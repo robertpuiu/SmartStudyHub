@@ -52,4 +52,17 @@ model Course {
     subject     Subject  @relation(fields: [subjectId], references: [id])
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
-  }
+  
+    Module Module[]
+}
+model Module {
+    id          String   @id @default(cuid())
+    title       String  @unique
+    slug        String   @unique
+    description String?
+    links     String[]
+    courseId    String
+    course      Course   @relation(fields: [courseId], references: [id])
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}

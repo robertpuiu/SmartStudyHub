@@ -9,6 +9,8 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import CreateModuleForm from "@/components/course-modules/CreateModule";
+import ModuleList from "@/components/course-modules/ModuleList";
 
 export default async function CoursePage({
   params,
@@ -31,9 +33,8 @@ export default async function CoursePage({
       </div>
     );
   }
-
   return (
-    <div className="p-8 max-w-3xl mx-auto">
+    <div className="mx-auto w-5/6">
       <Card className="shadow-md">
         <CardHeader>
           <CardTitle className="text-3xl">{course.title}</CardTitle>
@@ -45,6 +46,9 @@ export default async function CoursePage({
           <p className="whitespace-pre-line">
             {course.description ?? "No description provided."}
           </p>
+
+          <CreateModuleForm courseId={course.id}/>
+          <ModuleList courseId={course.id} />
         </CardContent>
         <CardFooter className="flex justify-between">
           <Link href="/course">
