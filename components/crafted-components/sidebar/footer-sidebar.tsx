@@ -11,7 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { auth, signOut } from "@/lib/auth";
+import { auth, getRole, signOut } from "@/lib/auth";
 import { ChevronUp, User } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -19,8 +19,10 @@ import SignInButton from "./sign-in-button";
 
 export default async function FooterSidebar() {
   const session = await auth();
+  const role = await getRole();
   return (
     <SidebarFooter>
+      <div className="bg-red-600 ">{role}</div>
       {session ? (
         <SidebarMenu>
           <SidebarMenuItem>

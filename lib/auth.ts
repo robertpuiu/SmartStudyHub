@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { encode as defaultEncode } from "next-auth/jwt";
-import NextAuth from "next-auth";
+import NextAuth, { DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "./db";
 import { PrismaAdapter } from "@auth/prisma-adapter";
@@ -63,3 +63,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
 });
+
+const getRole = async (): Promise<string> => {
+  const session = await auth();
+  if (!session) {
+    return "Guest";
+  }
+  return session.user.role as string;
+};
+export { getRole };
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      role: string;
+    } & DefaultSession["user"];
+  }
+}
