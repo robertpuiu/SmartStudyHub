@@ -1,4 +1,4 @@
-import { Home, Settings, FolderClosed, BookOpenText } from "lucide-react"
+import { Home, Settings, FolderClosed, BookOpenText } from "lucide-react";
 
 import {
   Sidebar,
@@ -9,7 +9,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import FooterSidebar from "./crafted-components/sidebar/footer-sidebar";
 
 // Menu items.
 const items = [
@@ -33,7 +34,7 @@ const items = [
     url: "#",
     icon: Settings,
   },
-]
+];
 
 export function AppSidebar() {
   return (
@@ -57,6 +58,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <FooterSidebar />
     </Sidebar>
-  )
+  );
 }
