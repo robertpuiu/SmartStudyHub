@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import CreateModuleForm from "@/components/course-modules/CreateModule";
 import ModuleList from "@/components/course-modules/ModuleList";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function CoursePage({
   params,
@@ -18,7 +20,9 @@ export default async function CoursePage({
   params: { slug: string };
 }) {
   const { slug } = await params;
-
+  const session = await auth();
+  const role = session?.user?.role;
+  if (!session) redirect("/sign-in");
   const course = await prisma.course.findUnique({
     where: { slug },
   });
@@ -46,8 +50,9 @@ export default async function CoursePage({
           <p className="whitespace-pre-line">
             {course.description ?? "No description provided."}
           </p>
-
-          <CreateModuleForm courseId={course.id}/>
+          {(role === "ADMIN" || role === "PROFESSOR") && (
+            <CreateModuleForm courseId={course.id} />
+          )}
           <ModuleList courseId={course.id} />
         </CardContent>
         <CardFooter className="flex justify-between">
