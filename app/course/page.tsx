@@ -9,17 +9,21 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { getRole } from "@/lib/auth";
 
 export default async function CoursesPage() {
+  const role = await getRole();
   const courses = await prisma.course.findMany();
 
   return (
     <div className="p-8">
       <header className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Courses</h1>
-        <Link href="/course/create">
-          <Button>Create Course</Button>
-        </Link>
+        {role === "PROFESSOR" || role === "ADMIN" ? (
+          <Button variant="secondary" asChild>
+            <Link href="/course/create">Create Course</Link>
+          </Button>
+        ) : null}
       </header>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
