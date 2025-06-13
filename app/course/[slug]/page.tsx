@@ -13,6 +13,7 @@ import CreateModuleForm from "@/components/course-modules/CreateModule";
 import ModuleList from "@/components/course-modules/ModuleList";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Uploader from "@/components/crafted-components/upload/uploader";
 
 export default async function CoursePage({
   params,
@@ -54,6 +55,8 @@ export default async function CoursePage({
             <CreateModuleForm courseId={course.id} />
           )}
           <ModuleList courseId={course.id} />
+          <Uploader attachedToId={course.id} ownerId={course.ownerId} />
+          {/* add prop for attachedToType */}
         </CardContent>
         <CardFooter className="flex justify-between">
           <Link href="/course">

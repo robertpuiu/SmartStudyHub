@@ -35,6 +35,8 @@ model User {
   Module Module[]
 
   Course Course[]
+
+  Material Material[]
 }
  
 model Account {
@@ -118,6 +120,8 @@ model Course {
     Owner  User @relation(fields: [ownerId], references: [id])
     ownerId String
     Module Module[]
+
+    Material Material[]
 }
 model Module {
     id          String   @id @default(cuid())
@@ -132,4 +136,25 @@ model Module {
 
     Owner  User @relation(fields: [ownerId], references: [id])
     ownerId String
+
+    Material Material[]
+}
+
+model Material {
+  id         String   @id @default(cuid())
+  title      String?
+  name       String   
+  type       String   // e.g. "PDF", "Link", "Video"
+  url        String?   // S3 URL or external link
+  fileKey    String?  // S3 object key if uploaded
+  course     Course?  @relation(fields: [courseId], references: [id])
+  courseId   String?
+  module     Module?  @relation(fields: [moduleId], references: [id])
+  moduleId   String?
+  owner      User     @relation(fields: [ownerId], references: [id])
+  ownerId    String
+  attachedToId String? // ID of the course, or module 
+  attachedToType String? // "COURSE" or "MODULE"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
