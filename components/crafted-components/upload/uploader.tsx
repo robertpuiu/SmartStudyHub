@@ -11,12 +11,14 @@ import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
 export default function Uploader({
   ownerId,
-  attachedToType = "COURSE",
+  attachedToType,
   attachedToId,
+  courseId,
 }: {
-  ownerId?: string;
-  attachedToType?: string;
-  attachedToId?: string;
+  ownerId: string;
+  attachedToType: string;
+  attachedToId: string;
+  courseId: string;
 }) {
   const [files, setFiles] = useState<
     Array<{
@@ -25,6 +27,7 @@ export default function Uploader({
       ownerId: string;
       attachedToType: string;
       attachedToId: string;
+      courseId: string;
       uploading: boolean;
       progress: number;
       key?: string;
@@ -48,6 +51,9 @@ export default function Uploader({
           filename: file.name,
           contentType: file.type,
           size: file.size,
+          attachedToType: attachedToType,
+          attachedToId: attachedToId,
+          ownerId: ownerId,
         }),
       });
 
@@ -64,8 +70,8 @@ export default function Uploader({
 
         return;
       }
-
       const { presignedUrl, key } = await presignedResponse.json();
+      const urlOfFile = presignedUrl.split("?")[0];
 
       // 2. Upload file to S3
 
@@ -102,12 +108,15 @@ export default function Uploader({
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 title: file.name, // -> change this
-                courseId: attachedToId,
+                courseId: courseId,
+                attachedToId: attachedToId,
                 ownerId: ownerId,
                 fileName: file.name,
                 fileType: file.type,
                 fileKey: key,
                 attachedToType: attachedToType,
+                url: urlOfFile,
+                type: "file",
               }),
             });
             toast.success("File uploaded successfully");
@@ -170,6 +179,7 @@ export default function Uploader({
           ownerId: ownerId as string,
           attachedToType: attachedToType as string,
           attachedToId: attachedToId as string,
+          courseId: courseId as string,
           progress: 0,
           isDeleting: false,
           error: false,
@@ -276,5 +286,125 @@ export default function Uploader({
         </div>
       )}
     </>
+  );
+}
+
+interface UploaderToggleProps {
+  attachedToId: string;
+  attachedToType: string;
+  ownerId: string;
+  courseId: string;
+}
+
+export function UploaderToggle({
+  attachedToId,
+  ownerId,
+  attachedToType,
+  courseId,
+}: UploaderToggleProps) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div>
+      <Button onClick={() => setVisible((v) => !v)}>
+        {visible ? "Cancel Upload" : `Upload Material to ${attachedToType}`}
+      </Button>
+      {visible && (
+        <div>
+          <Uploader
+            courseId={courseId}
+            attachedToId={attachedToId}
+            ownerId={ownerId}
+            attachedToType={attachedToType}
+          />
+          <LinkResource
+            courseId={courseId}
+            attachedToId={attachedToId}
+            ownerId={ownerId}
+            attachedToType={attachedToType}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface LinkResourceProps {
+  courseId: string;
+  attachedToId: string;
+  ownerId: string;
+  attachedToType: string;
+}
+
+export function LinkResource({
+  courseId,
+  attachedToId,
+  ownerId,
+  attachedToType,
+}: LinkResourceProps) {
+  const [visible, setVisible] = useState(false);
+  const [link, setLink] = useState("");
+  const [title, setTitle] = useState("");
+
+  const handleLinkSubmit = async () => {
+    if (!link) return;
+
+    try {
+      const response = await fetch("/api/materials/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "link",
+          title: title,
+          courseId,
+          attachedToId,
+          ownerId,
+          fileName: link.split("/").pop(),
+          fileType: "link",
+          fileKey: "",
+          attachedToType,
+          url: link,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Link added successfully");
+        setLink("");
+      } else {
+        toast.error("Failed to add link");
+      }
+    } catch (error) {
+      console.error("Error adding link:", error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  return (
+    <div className="mt-4">
+      <Button onClick={() => setVisible((v) => !v)}>
+        {visible ? "Cancel Link" : "Add Link Resource"}
+      </Button>
+      {visible && (
+        <div className="mt-4">
+          <input
+            type="text"
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+            placeholder="Enter resource link"
+            className="border p-2 rounded w-full"
+          />
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter resource title (optional)"
+            className="border p-2 rounded w-full mt-2"
+          />
+          <Button onClick={handleLinkSubmit} className="mt-2">
+            Submit Link
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }

@@ -39,6 +39,11 @@ export const POST = auth(async (request) => {
       Key: uniqueKey,
       ContentType: contentType,
       ContentLength: size,
+      Metadata: {
+        ownerId: body.ownerId,
+        attachedToType: body.attachedToType,
+        attachedToId: body.attachedToId,
+      },
     });
 
     const presignedUrl = await getSignedUrl(S3, command, {

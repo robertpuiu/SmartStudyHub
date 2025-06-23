@@ -9,11 +9,13 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import CreateModuleForm from "@/components/course-modules/CreateModule";
 import ModuleList from "@/components/course-modules/ModuleList";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import Uploader from "@/components/crafted-components/upload/uploader";
+import { UploaderToggle } from "@/components/crafted-components/upload/uploader";
+import MaterialsList from "@/components/crafted-components/materials/materials-list";
+import ShowCreateModuleForm from "@/components/course-modules/ShowCreateModuleForm";
+import LLMchat from "@/components/llm-chat/llm-chat";
 
 export default async function CoursePage({
   params,
@@ -23,6 +25,7 @@ export default async function CoursePage({
   const { slug } = await params;
   const session = await auth();
   const role = session?.user?.role;
+  const username = session?.user?.name || session?.user?.email || "Guest";
   if (!session) redirect("/sign-in");
   const course = await prisma.course.findUnique({
     where: { slug },
@@ -43,20 +46,32 @@ export default async function CoursePage({
       <Card className="shadow-md">
         <CardHeader>
           <CardTitle className="text-3xl">{course.title}</CardTitle>
-          <CardDescription>
+          <CardDescription className="mb-4">
             Created on {course.createdAt.toLocaleDateString()}
+            <p> {course.description ?? "No description provided."}</p>
           </CardDescription>
+          {role === "PROFESSOR" && (
+            <div className="flex justify-around">
+              <UploaderToggle
+                courseId={course.id}
+                attachedToId={course.id}
+                ownerId={course.ownerId}
+                attachedToType="Course"
+              />
+              <ShowCreateModuleForm courseId={course.id} />
+            </div>
+          )}
         </CardHeader>
         <CardContent>
-          <p className="whitespace-pre-line">
-            {course.description ?? "No description provided."}
-          </p>
-          {(role === "ADMIN" || role === "PROFESSOR") && (
-            <CreateModuleForm courseId={course.id} />
-          )}
+          <MaterialsList attachedToType="Course" attachedToId={course.id} />
           <ModuleList courseId={course.id} />
-          <Uploader attachedToId={course.id} ownerId={course.ownerId} />
-          {/* add prop for attachedToType */}
+          <LLMchat
+            courseId={course.id}
+            contextType="course"
+            contextId={course.id}
+            username={username}
+          />
+          {/* <Chat /> */}
         </CardContent>
         <CardFooter className="flex justify-between">
           <Link href="/course">

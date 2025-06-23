@@ -16,13 +16,15 @@ export const POST = auth(async (req) => {
 
     const createMaterialInDB = await prisma.material.create({
       data: {
-        title: body.title as string, // Assuming body.title is the title of the material
-        courseId: body.courseId as string, // Assuming body.courseId is the ID of the course
-        ownerId: req.auth.user.id as string, // Assuming req.auth.user.id is the user ID
+        title: body.title as string,
+        courseId: body.courseId as string,
+        ownerId: req.auth.user.id as string,
         name: body.fileName as string,
-        type: body.fileType as string, // Assuming body.fileType is the type of the file (e.g., "pdf", "docx", etc.)
+        type: body.type as string,
         fileKey: body.fileKey as string,
-        attachedToId: body.attachedToId, // This should be the ID of the course or module
+        attachedToId: body.attachedToId,
+        url: body.url as string,
+        attachedToType: body.attachedToType as string,
       },
     });
 
