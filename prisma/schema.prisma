@@ -37,6 +37,10 @@ model User {
   Course Course[]
 
   Material Material[]
+
+  StudentConversations LLMConversation[] @relation("StudentConversations")
+  
+  ProfessorConversations LLMConversation[] @relation("ProfessorConversations")
 }
  
 model Account {
@@ -122,6 +126,8 @@ model Course {
     Module Module[]
 
     Material Material[]
+
+    LLMConversation LLMConversation[]
 }
 model Module {
     id          String   @id @default(cuid())
@@ -138,6 +144,8 @@ model Module {
     ownerId String
 
     Material Material[]
+
+    LLMConversation LLMConversation[]
 }
 
 model Material {
@@ -155,6 +163,38 @@ model Material {
   ownerId    String
   attachedToId String? // ID of the course, or module 
   attachedToType String? // "COURSE" or "MODULE"
+  extractedText String? // For text extraction from PDFs
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model LLMConversation {
+  id             String    @id @default(cuid())
+  questionText   String
+  answerText     String?
+  validated      Boolean   @default(false)
+  feedbackText   String?   // ultima corectură / comentariu
+  hasFeedback    Boolean   @default(false)
+  studentId      String
+  professorId    String?  
+  courseId       String
+  moduleId       String?   // dacă e în context de modul
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  contextlocation String? // locația contextului (ex: "course", "module"
+
+  tag           CognitiveFocus
+
+  student        User?      @relation("StudentConversations", fields: [studentId], references: [id])
+  professor      User?     @relation("ProfessorConversations", fields: [professorId], references: [id])
+  course         Course    @relation(fields: [courseId], references: [id])
+  module         Module?   @relation(fields: [moduleId], references: [id])
+}
+enum CognitiveFocus {
+  DEFINITION
+  CONCRETE_EXAMPLE
+  CONCEPTUAL_REASONING
+  EDGE_CASES
+  COMPARISON
+  OTHER
 }
