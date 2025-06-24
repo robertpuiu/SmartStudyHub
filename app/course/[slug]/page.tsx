@@ -16,6 +16,7 @@ import { UploaderToggle } from "@/components/crafted-components/upload/uploader"
 import MaterialsList from "@/components/crafted-components/materials/materials-list";
 import ShowCreateModuleForm from "@/components/course-modules/ShowCreateModuleForm";
 import LLMchat from "@/components/llm-chat/llm-chat";
+import Feed from "@/components/llm-chat/feed";
 
 export default async function CoursePage({
   params,
@@ -71,7 +72,7 @@ export default async function CoursePage({
             contextId={course.id}
             username={username}
           />
-          {/* <Chat /> */}
+          <Feed courseId={course.id} />
         </CardContent>
         <CardFooter className="flex justify-between">
           <Link href="/course">

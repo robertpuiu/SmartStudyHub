@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import type { LLMConversation } from "@prisma/client";
 
 interface Props {
@@ -11,8 +12,8 @@ interface Props {
 }
 
 export default function ReviewItem({ convo }: Props) {
-  const [validated, setValidated] = useState(false);
-  const [feedbackText, setFeedbackText] = useState("");
+  const [validated, setValidated] = useState(convo.validated);
+  const [feedbackText, setFeedbackText] = useState(convo.feedbackText || "");
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -27,44 +28,54 @@ export default function ReviewItem({ convo }: Props) {
       }),
     });
     setSaving(false);
-    // opțional: refetch sau elimină din listă
   };
 
   return (
-    <div className="border rounded p-4 mb-4 shadow-sm">
-      <p className="text-gray-600 text-sm">
-        Student: {convo.student.name || "—"} | Curs: {convo.course.title}
-      </p>
-      <p className="mt-2">
-        <span className="font-semibold">Întrebare:</span> {convo.questionText}
-      </p>
-      <pre className="mt-2 bg-gray-50 p-3 rounded whitespace-pre-wrap">
-        {convo.answerText}
-      </pre>
+    <div className="border rounded p-4 shadow-sm">
+      <div className="flex justify-between items-center">
+        <div className="space-y-1">
+          <p className="text-sm text-gray-600">
+            Student: {convo.student.name ?? "—"}
+          </p>
+          <p className="text-sm text-gray-600">Curs: {convo.course.title}</p>
+          <p className="text-xs text-blue-600 font-medium">
+            Tag: {convo.tag.replace("_", " ")}
+          </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <input
+            id={`val-${convo.id}`}
+            type="checkbox"
+            checked={validated}
+            onChange={(e) => setValidated(e.target.checked)}
+            className="h-4 w-4"
+          />
+          <label htmlFor={`val-${convo.id}`} className="text-sm">
+            Validat
+          </label>
+        </div>
+      </div>
 
       <div className="mt-4 space-y-2">
+        <p className="font-semibold">Întrebare:</p>
+        <p className="whitespace-pre-wrap">{convo.questionText}</p>
+
+        <p className="font-semibold mt-2">Răspuns LLM:</p>
+        <pre className="whitespace-pre-wrap bg-gray-50 p-3 rounded">
+          {convo.answerText}
+        </pre>
+
         <textarea
-          className="w-full border rounded p-2"
+          className="w-full border rounded p-2 mt-2"
           rows={3}
           placeholder="Comentariu / corectură..."
           value={feedbackText}
           onChange={(e) => setFeedbackText(e.target.value)}
         />
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={validated}
-            onChange={(e) => setValidated(e.target.checked)}
-          />
-          <span>Marchează ca Validat</span>
-        </label>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {saving ? "Salvez..." : "Salvează Feedback"}
-        </button>
+
+        <Button onClick={handleSave} disabled={saving} className="mt-2">
+          {saving ? "Se salvează..." : "Salvează Feedback"}
+        </Button>
       </div>
     </div>
   );

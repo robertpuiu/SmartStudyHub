@@ -11,6 +11,8 @@ import { prisma } from "@/lib/db";
 import { getRole } from "@/lib/auth";
 import { UploaderToggle } from "../crafted-components/upload/uploader";
 import MaterialsList from "../crafted-components/materials/materials-list";
+import Feed from "../llm-chat/feed";
+import SingleStreamingQA from "../llm-chat/llm-chat";
 
 export default async function ModuleListAccordion({
   courseId,
@@ -69,6 +71,12 @@ export default async function ModuleListAccordion({
                   </Link>
                 </div>
                 <MaterialsList attachedToType="Module" attachedToId={mod.id} />
+                <SingleStreamingQA
+                  courseId={courseId}
+                  contextType="module"
+                  contextId={mod.id}
+                />
+                <Feed courseId={courseId} moduleId={mod.id} />
               </AccordionContent>
             </AccordionItem>
           ))}
